@@ -11,7 +11,7 @@ class TitleScene(Scene):
         super(TitleScene,self).__init__()
         self.sfont=pg.font.SysFont('cursive', 32)
         self.state={"level_progress":0,"num_levels":0}
-        self.state[num_levels]=len(pickle.load(open(r"joc project\\levels",encoding='UTF8')))
+        self.state["num_levels"]=len(pickle.load(open(r"joc project\\levels", 'rb')))
 
 
 
@@ -120,7 +120,49 @@ class LoseScene(TrasitionScene):
     
 
 class NarrativeScene(Scene):
-    pass
+    def __init__(self,text,state,scene):
+        super(NarrativeScene,self).__init__()
+        self.font=pg.font.SysFont('cursive', 32)
+        self.text=text
+        self.state=state
+        self.scene=scene
+        self.text_num=0
+        self.bg=pg.image.load(r'joc project\\images\\narrative-background.jpg')
+
+    def render(self, screen):
+        screen.blit(self.bg,(0,0))
+        self.drawText(screen,self.text[self.text_num])
+    
+    def update(self):
+        pass
+
+    def handleEvents(self, events):
+        for e in events:
+            if e.type==MOUSEBUTTONUP:
+                pos=pg.mouse.get_pos()
+
+                if pg.Rect(550, 500, 120, 50).collidepoint(pos):
+                    self.text_num=len(self.text)
+                self.manager.go_to(self.scene)
+
+    def drawText(self,screen,text):
+        rect=pg.Rect(50, 70, 700, 450)
+        y=rect.top
+        lineSpacing=-2
+        fontHeight=self.font.size("Tg")[1]
+
+        while text:
+            i=1
+            while self.font.size(text[:i])[0] < rect.width and i<len(text):
+                i+=1
+            if i< len(text):
+                i=text.rfind(" ",0,i)+1
+            img=self.font.render(text[:i], True, 'white')
+            screen.blit(img,(rect.left,y))
+            y+=fontHeight+lineSpacing
+            text=text[:i]
+        
+        return text
 
 class LevelSquare(pg.sprite.Sprite):
     def __init__(self,x,y,level,available):
